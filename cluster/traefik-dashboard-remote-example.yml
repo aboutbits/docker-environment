@@ -1,0 +1,31 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+spec:
+  selector:
+    app: traefik
+  ports:
+    - name: dashboard
+      port: 8080
+      protocol: TCP
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik-ingress
+  namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/auth-type: "basic"
+    traefik.ingress.kubernetes.io/auth-secret: "traefik-auth"
+spec:
+  rules:
+  - host: traefik.aboutbits.it
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: traefik-dashboard
+          servicePort: dashboard

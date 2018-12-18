@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  traefik:
+    image: traefik
+    command: --api --docker
+    restart: unless-stopped
+    volumes:
+      - ./traefik.toml:/etc/traefik/traefik.toml
+      - ./certificates:/var/certificates
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      - traefik.frontend.rule=Host:traefik.aboutbits.local
+      - traefik.port=8080
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  nginx:
+    image: registry.gitlab.com/aboutbits/example:1.0
+    build: .
+    volumes:
+      - ./public:/usr/share/nginx/html
+    networks:
+      - internal
+      - proxy
+    labels:
+      - traefik.frontend.rule=Host:example.aboutbits.local
+      - traefik.docker.network=proxy
+      - traefik.port=80
+      - traefik.backend=example
+
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false

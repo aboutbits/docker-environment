@@ -1,0 +1,7 @@
+*
+!.gitignore
+!readme.md
+!traefik-load-balancer-local-example.yml
+!traefik-load-balancer-remote-example.yml
+!traefik-dashboard-local-example.yml
+!traefik-dashboard-remote-example.yml

@@ -1,0 +1,56 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: example-service
+  namespace: example
+  labels:
+    app: example
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: example
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: example-deployment
+  namespace: example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example
+  template:
+    metadata:
+      labels:
+        app: example
+    spec:
+      containers:
+        - name: nginx
+          image: registry.gitlab.com/aboutbits/example:1.0
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+      - name: gitlab-registry
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: example-ingress
+  namespace: example
+spec:
+  rules:
+  - host: example.aboutbits.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: example-service
+          servicePort: http
+  tls:
+   - secretName: example-cert

@@ -1,0 +1,157 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: traefik-ingress-controller
+  namespace: traefik
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: traefik-ingress-controller
+  namespace: traefik
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: traefik-config
+  namespace: traefik
+data:
+  traefik.toml: |
+    debug = false
+    logLevel = "INFO"
+
+    defaultEntryPoints = ["http", "https"]
+    [entryPoints]
+      [entryPoints.http]
+        address = ":80"
+        compress = true
+        [entryPoints.http.redirect]
+        entryPoint = "https"
+      [entryPoints.https]
+        address = ":443"
+        compress = true
+        [entryPoints.https.tls]
+    [api]
+    [kubernetes]
+    [acme]
+      email = "your@email.com"
+      storage = "/acme/acme.json"
+      entryPoint = "https"
+      onHostRule = true
+      [acme.httpChallenge]
+      entryPoint = "http"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: traefik-volume
+  namespace: traefik
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: do-block-storage
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik-deployment
+  namespace: traefik
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60
+      containers:
+      - image: traefik
+        name: traefik
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /acme
+          name: acme
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        - name: dashboard
+          containerPort: 8080
+        args:
+        - --logLevel=INFO
+        - --configfile=/config/traefik.toml
+      volumes:
+      - name: config
+        configMap:
+          name: traefik-config
+      - name: acme
+        persistentVolumeClaim:
+          claimName: traefik-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-load-balancer
+  namespace: traefik
+  labels:
+    app: traefik
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-tls-passthrough: "true"
+spec:
+  selector:
+    app: traefik
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  sessionAffinity: None
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP

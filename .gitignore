@@ -1,0 +1,6 @@
+# Basic
+.DS_Store
+
+# IDE
+/.vscode
+/.idea
