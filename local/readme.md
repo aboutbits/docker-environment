@@ -14,6 +14,7 @@ Therefore, this project uses Traefik as a reverse proxy and provides already a p
     - [Start Traefik](#start-traefik)
     - [Reload Traefik](#reload-traefik)
     - [Stop Traefik](#stop-traefik)
+- [Documentation](#documentation)
 
 ## Prerequisites
 
@@ -127,3 +128,7 @@ cd local && docker-compose up --detach --force-recreate
 ```bash
 cd local && docker-compose down
 ```
+
+## Documentation
+
+Additional information about the usage of Traefik with Docker can be found [here](https://docs.traefik.io/configuration/backends/docker/). There you can find additional configuration settings and possible security concerns, that should be considered.
