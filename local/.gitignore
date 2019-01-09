@@ -2,4 +2,4 @@
 !.gitignore
 !readme.md
 !docker-compose-example.yml
-!traefik-example.yml
+!traefik-example.toml

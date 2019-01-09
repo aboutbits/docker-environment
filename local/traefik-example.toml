@@ -1,0 +1,23 @@
+debug = false
+
+logLevel = "INFO"
+defaultEntryPoints = ["https", "http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+  compress = true
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  compress = true
+  [entryPoints.https.tls]
+    [[entryPoints.https.tls.certificates]]
+    keyFile = "/var/certificates/traefik.aboutbits.local.key"
+    certFile = "/var/certificates/traefik.aboutbits.local.pem"
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+watch = true
+exposedByDefault = false
