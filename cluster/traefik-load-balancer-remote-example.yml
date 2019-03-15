@@ -51,7 +51,6 @@ data:
   traefik.toml: |
     debug = false
     logLevel = "INFO"
-
     defaultEntryPoints = ["http", "https"]
     [entryPoints]
       [entryPoints.http]
@@ -106,8 +105,9 @@ spec:
       serviceAccountName: traefik-ingress-controller
       terminationGracePeriodSeconds: 60
       containers:
-      - image: traefik
-        name: traefik
+      - name: traefik
+        image: "traefik:1.7"
+        imagePullPolicy: Always
         volumeMounts:
         - mountPath: /config
           name: config
