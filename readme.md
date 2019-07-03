@@ -1,3 +1,10 @@
+## Attention
+
+This project was replaced by the following two projects, that focus more and better on the particular part:
+
+- [Local Environment](https://github.com/aboutbits/local-environment)
+- [Kubernetes Environment](https://github.com/aboutbits/kubernetes-environment)
+
 Docker Environment
 ==================
 
